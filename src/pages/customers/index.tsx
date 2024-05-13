@@ -6,14 +6,12 @@ import AddCustomer from "@/components/AddCustomers";
 import { useAuth } from "@/providers/AuthContextProvider";
 
 // Icons
-import { GoPeople } from "react-icons/go";
+import { CiSearch } from "react-icons/ci";
 import { GoVerified } from "react-icons/go";
+import { usePathname } from "next/navigation";
+import { Input } from "@/components/ui/input";
 import { IoIosAddCircle } from "react-icons/io";
 import { PiBuildingsThin, PiDesktopLight } from "react-icons/pi";
-import { IoArrowUpSharp, IoArrowDownSharp } from "react-icons/io5";
-import { Input } from "@/components/ui/input";
-import { CiSearch } from "react-icons/ci";
-import { usePathname } from "next/navigation";
 
 export default function Customer() {
   const user = useAuth();
@@ -26,12 +24,13 @@ export default function Customer() {
     };
   }, []);
   const pathname = usePathname();
+
   return (
     <section className=" bg-[#FAFBFF] h-screen w-full overflow-y-scroll">
       {user && user.userDetails?.role === "Admin" ? (
         <div className="text-black rounded-3xl p-4">
           {/* Analytics */}
-          <section className="h-10 flex items-center justify-between sm:px-4 md:px-16 md:pt-2 ">
+          <section className="h-10 flex items-center justify-between sm:px-4 md:pt-2 ">
             {pathname && (
               <div className="capitalize font-bold tracking-wide sm:text-sm md:text-base">
                 {pathname.replace("/", " ")}

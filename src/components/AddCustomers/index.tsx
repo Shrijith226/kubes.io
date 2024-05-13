@@ -239,7 +239,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
   return (
     <div
       onClick={() => setToggleAdd(false)}
-      className="fixed top-0 left-0 h-screen bg-white bg-opacity-5 backdrop-blur w-full flex justify-center items-center"
+      className="fixed top-0 left-0 h-screen bg-transparent w-full flex justify-center items-center"
     >
       <motion.div
         onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}

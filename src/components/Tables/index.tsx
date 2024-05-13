@@ -1,20 +1,21 @@
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { AnimatePresence, motion } from "framer-motion";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import {
   useState,
   useEffect,
   FC,
   FormEvent,
-  ChangeEvent,
   Dispatch,
   SetStateAction,
   useCallback,
 } from "react";
 
 // Icons
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaRegEye } from "react-icons/fa";
 import { IoMdDownload } from "react-icons/io";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
@@ -79,101 +80,110 @@ export default function DataTable() {
     fetchData();
   }, []);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const columns: GridColDef[] = [
     {
       field: "uniqueID",
       headerName: "Membership ID",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       align: "center",
       headerAlign: "center",
-      resizable: false,
       headerClassName: "w-full",
     },
     {
       field: "firstName",
       headerName: "First Name",
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: false,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "lastName",
       headerName: "Last Name",
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "companyName",
       headerName: "Company",
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "emailID",
       headerName: "Email",
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "dob",
       headerName: "DOB(DD/MM)",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "phoneNumber",
       headerName: "Phone Number",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "birthdayDiscount",
       headerName: "Birthday Discount",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "specialDiscount",
       headerName: "Special Discount",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "isActive",
       headerName: "Activity Status",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "action",
       headerName: "Action",
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
       renderCell: (params) => (
-        <div className="flex items-center justify-center h-12 w-2/4">
+        <div className="flex items-center justify-center h-12">
           <div className="flex justify-center items-center gap-4 text-xl">
             <div
               onClick={() => {
@@ -192,6 +202,14 @@ export default function DataTable() {
               onClick={() => setEditingCustomer(params.row)}
             >
               <FaEdit />
+            </div>
+
+            <div
+              className="text-main cursor-pointer"
+              title="view"
+              onClick={() => setEditingCustomer(params.row)}
+            >
+              <FaRegEye />
             </div>
           </div>
         </div>
@@ -230,7 +248,7 @@ export default function DataTable() {
         <Button
           variant={"outline"}
           onClick={downloadData}
-          className="rounded-3xl border-main absolute -top-[1.6rem] right-0 text-sm"
+          className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-40 right-0 lg:right-44 text-sm"
         >
           <IoMdDownload className="text-main text-xl mr-2" /> Download Audit Log
         </Button>
