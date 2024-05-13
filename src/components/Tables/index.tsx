@@ -83,7 +83,7 @@ export default function DataTable() {
     {
       field: "uniqueID",
       headerName: "Membership ID",
-      flex: 1,
+      width: 135,
       width: 180,
       align: "center",
       headerAlign: "center",
@@ -93,7 +93,7 @@ export default function DataTable() {
     {
       field: "firstName",
       headerName: "First Name",
-      flex: 1,
+      width: 135,
       align: "center",
       width: 180,
       headerAlign: "center",
@@ -103,7 +103,7 @@ export default function DataTable() {
     {
       field: "lastName",
       headerName: "Last Name",
-      flex: 1,
+      width: 135,
       align: "center",
       width: 180,
       headerAlign: "center",
@@ -113,7 +113,7 @@ export default function DataTable() {
     {
       field: "companyName",
       headerName: "Company",
-      flex: 1,
+      width: 135,
       align: "center",
       width: 180,
       headerAlign: "center",
@@ -123,7 +123,7 @@ export default function DataTable() {
     {
       field: "emailID",
       headerName: "Email",
-      flex: 1,
+      width: 135,
       align: "center",
       width: 180,
       headerAlign: "center",
@@ -133,7 +133,7 @@ export default function DataTable() {
     {
       field: "dob",
       headerName: "DOB(DD/MM)",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
@@ -142,7 +142,7 @@ export default function DataTable() {
     {
       field: "phoneNumber",
       headerName: "Phone Number",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
@@ -151,7 +151,7 @@ export default function DataTable() {
     {
       field: "birthdayDiscount",
       headerName: "Birthday Discount",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
@@ -160,7 +160,7 @@ export default function DataTable() {
     {
       field: "specialDiscount",
       headerName: "Special Discount",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
@@ -169,7 +169,7 @@ export default function DataTable() {
     {
       field: "isActive",
       headerName: "Activity Status",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
@@ -178,7 +178,7 @@ export default function DataTable() {
     {
       field: "action",
       headerName: "Action",
-      flex: 1,
+      width: 135,
       align: "center",
       headerAlign: "center",
       resizable: true,
