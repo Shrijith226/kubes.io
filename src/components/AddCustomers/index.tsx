@@ -573,11 +573,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
                               heading="Suggestions"
                               className="h-32 overflow-y-scroll"
                             >
-<<<<<<< HEAD
                               {Array.from(Array(26).keys()).map((value) => (
-=======
-                              {[...Array(26).keys()].map((value) => (
->>>>>>> 3fb44b6e2c4056ee6fbd29fb9abea764f41ef89d
                                 <CommandItem
                                   key={value}
                                   value={value.toString()}
@@ -632,11 +628,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
                               heading="Suggestions"
                               className="h-32 overflow-y-scroll"
                             >
-<<<<<<< HEAD
                               {Array.from(Array(26).keys()).map((value) => (
-=======
-                              {[...Array(26).keys()].map((value) => (
->>>>>>> 3fb44b6e2c4056ee6fbd29fb9abea764f41ef89d
                                 <CommandItem
                                   key={value}
                                   value={value.toString()}
