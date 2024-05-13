@@ -4,6 +4,7 @@ import DataTable from "@/components/Tables";
 import { AnimatePresence } from "framer-motion";
 import AddCustomer from "@/components/AddCustomers";
 import { useAuth } from "@/providers/AuthContextProvider";
+import { useCustomers } from "@/providers/CustomerCountProvider";
 
 // Icons
 import { CiSearch } from "react-icons/ci";
@@ -11,10 +12,13 @@ import { GoVerified } from "react-icons/go";
 import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { IoIosAddCircle } from "react-icons/io";
+import { MdOutlinePeopleAlt } from "react-icons/md";
 import { PiBuildingsThin, PiDesktopLight } from "react-icons/pi";
 
 export default function Customer() {
   const user = useAuth();
+  const pathname = usePathname();
+  const { customerCount } = useCustomers();
   const [isLoading, setIsLoading] = useState(true);
   const [toggleAdd, setToggleAdd] = useState<boolean>(false);
 
@@ -23,8 +27,6 @@ export default function Customer() {
       setIsLoading(false);
     };
   }, []);
-  const pathname = usePathname();
-
   return (
     <section className=" bg-[#FAFBFF] h-screen w-full overflow-y-scroll">
       {user && user.userDetails?.role === "Admin" ? (
@@ -58,11 +60,13 @@ export default function Customer() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4 ">
             <div className="space-x-2 bg-white rounded-md">
               <div className="flex justify-center p-2">
-                <PiBuildingsThin className="text-main md:text-4xl w-10 h-10 sm:text-2xl" />
+                <MdOutlinePeopleAlt className="text-main md:text-4xl w-10 h-10 sm:text-2xl" />
               </div>
               <div>
                 <h1 className="text-center">Total customers</h1>
-                count
+                <p className="text-center text-lg font-medium">
+                  {customerCount}
+                </p>
               </div>
             </div>
             <div className="space-x-2 bg-white rounded-md">

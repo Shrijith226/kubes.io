@@ -1,12 +1,9 @@
 "use client";
-import Link from "next/link";
 import { useState, useEffect} from "react";
 import { AnimatePresence } from "framer-motion";
 import AddCompany from "@/components/CompanyList/index";
 import { useAuth } from "@/providers/AuthContextProvider";
 import { IoIosAddCircle } from "react-icons/io";
-import { GoPeople } from "react-icons/go";
-import { IoArrowUpSharp, IoArrowDownSharp } from "react-icons/io5";
 import DataTable from "@/components/Tables/company";
 import { GoVerified } from "react-icons/go";
 import { PiDesktopLight } from "react-icons/pi";

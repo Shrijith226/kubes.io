@@ -10,8 +10,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 
@@ -30,8 +30,10 @@ import Navbar from "@/components/Navbar";
 
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { AuthProvider } from "@/providers/AuthContextProvider";
 import Sidebar from "@/components/Sidebar";
+import { AuthProvider } from "@/providers/AuthContextProvider";
+import { CustomerProvider } from "@/providers/CustomerCountProvider";
+
 const formSchema = z.object({
   email: z.string().email({
     message: "Invalid email address.",
@@ -43,8 +45,8 @@ const formSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
-export default function App({ Component, pageProps }: AppProps) {
 
+export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     // Check if user is logged in when component mounts
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -169,13 +171,15 @@ export default function App({ Component, pageProps }: AppProps) {
       {isLoggedIn ? (
         <main className="">
           <AuthProvider>
-            <main className="flex ">
-              <Sidebar />
+            <CustomerProvider>
+              <main className="flex ">
+                <Sidebar />
 
-              <Component {...pageProps} />
-            </main>
+                <Component {...pageProps} />
+              </main>
 
-            <Navbar />
+              <Navbar />
+            </CustomerProvider>
           </AuthProvider>
         </main>
       ) : (

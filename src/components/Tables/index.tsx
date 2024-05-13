@@ -248,7 +248,7 @@ export default function DataTable() {
         <Button
           variant={"outline"}
           onClick={downloadData}
-          className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-40 right-0 lg:right-44 text-sm"
+          className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-[4.4rem] right-0 lg:right-44 text-sm"
         >
           <IoMdDownload className="text-main text-xl mr-2" /> Download Audit Log
         </Button>
