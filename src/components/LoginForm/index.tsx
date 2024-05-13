@@ -11,10 +11,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 
 // Icons
 import { IoIosArrowRoundBack } from "react-icons/io";
@@ -26,17 +26,8 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { Label } from "@/components/ui/label";
-import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import Topbar from "@/components/Topbar";
+import { Label } from "../ui/label";
 
-
-
-import "@/styles/globals.css";
-import type { AppProps } from "next/app";
-import { AuthProvider } from "@/providers/AuthContextProvider";
-import Sidebar from "@/components/Sidebar";
 const formSchema = z.object({
   email: z.string().email({
     message: "Invalid email address.",
@@ -48,18 +39,9 @@ const formSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
-export default function App({ Component, pageProps }: AppProps) {
 
-
+export default function Index() {
   const router = useRouter();
-
-
-  useEffect(() => {
-    // Check if user is logged in when component mounts
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedIn);
-  }, []);
-
   const [isEmail, setIsEmail] = useState<string>("");
   const [isPassword, setIsPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -119,12 +101,10 @@ export default function App({ Component, pageProps }: AppProps) {
         if (userLogin && userLogin.email && userLogin.uid) {
           setError("");
           setIsLoading(false);
-      
+          router.push("/company-list");
           setIsSuccess("Login successfull");
           localStorage.setItem("UID", userLogin.uid);
           localStorage.setItem("Email", userLogin.email);
-          setIsLoggedIn(true);
-          localStorage.setItem('isLoggedIn', 'true');
         }
       }
     } catch (error: unknown) {
@@ -173,46 +153,9 @@ export default function App({ Component, pageProps }: AppProps) {
       setIsLoading(false);
     }
   };
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  return(
-  <>
-   
-   {isLoggedIn ? (
-    <main className="">
-      <AuthProvider>
-           <main className="flex ">
-           
-              <Sidebar />
-           
 
-          
-              
-              <Component {...pageProps} />
-              
-           
-          </main>
-  
-          <Navbar />
-  
-    </AuthProvider>
-  </main>
-    ) : (
-      
-      <main>
-      <section className="h-screen overflow-hidden md:flex md:justify-between items-center">
-        <div className="w-1/2 h-full flex justify-center items-center">
-          <Image
-            src={"/kubes.png"}
-            alt="KUBES"
-            priority
-            height={10000}
-            width={10000}
-            className="w-96 h-96 object-cover"
-          />
-        </div>
-
-        <div className="w-1/2 h-full flex justify-center items-center">
-        <div>
+  return (
+    <div>
       <h1 className="font-bold text-6xl">
         {!isForgetPasswordClicked ? "Login" : "ForgetPassword"}
       </h1>
@@ -378,12 +321,5 @@ export default function App({ Component, pageProps }: AppProps) {
         </Form>
       )}
     </div>
-        </div>
-      </section>
-    </main>
-     )}
-     </>
-);
-  
-
+  );
 }
