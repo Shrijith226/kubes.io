@@ -1,5 +1,5 @@
 "use client";
-import DataTable from "@/components/Tables";
+import DataTable from "@/components/Tables/Customers";
 import React from "react";
 
 const Page = () => {

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { FaEdit, FaEye } from "react-icons/fa";
 import { Button } from "../ui/button";
- 
+
 import { db } from "@/lib/firebase";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { query, where, collectionGroup } from "firebase/firestore";
- 
+import { Input } from "../ui/input";
+import { CiSearch } from "react-icons/ci";
 
 interface CompanyData {
   companyId: string;
@@ -25,28 +26,34 @@ export default function DataTable() {
   const [editingRow, setEditingRow] = useState<CompanyData | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
- 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Query all companies
-        const companiesQuerySnapshot = await getDocs(collection(db, "companies"));
+        const companiesQuerySnapshot = await getDocs(
+          collection(db, "companies")
+        );
         const companiesData: CompanyData[] = [];
-  
+
         // Loop through each company
         for (const companyDoc of companiesQuerySnapshot.docs) {
           const companyData = companyDoc.data() as CompanyData;
           const companyId = companyDoc.id;
-  
+
           // Query customers for the current company
-          const customersQuerySnapshot = await getDocs(query(collection(db, "customers"), where("companyName", "==", companyData.companyName)));
-  
+          const customersQuerySnapshot = await getDocs(
+            query(
+              collection(db, "customers"),
+              where("companyName", "==", companyData.companyName)
+            )
+          );
+
           // Get customer count
           let customerCount = 0;
-          customersQuerySnapshot.forEach(customerDoc => {
+          customersQuerySnapshot.forEach((customerDoc) => {
             customerCount++;
           });
-  
+
           // Add company data with customer count
           companiesData.push({
             ...companyData,
@@ -54,18 +61,17 @@ export default function DataTable() {
             customerCount,
           });
         }
-  
+
         // Set the state with company data including customer count
         setRows(companiesData);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
-  
+
   const handleEdit = (row: CompanyData) => {
     setEditingRow(row);
     setIsEditing(true);
@@ -73,12 +79,17 @@ export default function DataTable() {
 
   const handleUpdate = async (updatedData: Partial<CompanyData>) => {
     try {
-      await updateDoc(doc(db, "companies", (updatedData as CompanyData).companyId), updatedData);
+      await updateDoc(
+        doc(db, "companies", (updatedData as CompanyData).companyId),
+        updatedData
+      );
       setIsEditing(false);
       setEditingRow(null);
       const updatedRows = await getDocs(collection(db, "companies"));
       setRows(
-        updatedRows.docs.map((doc) => ({ ...doc.data(), companyId: doc.id }) as CompanyData)
+        updatedRows.docs.map(
+          (doc) => ({ ...doc.data(), companyId: doc.id } as CompanyData)
+        )
       );
       setNotification("Company data updated successfully!");
       setTimeout(() => {
@@ -89,7 +100,6 @@ export default function DataTable() {
       setNotification("Error updating company data!");
     }
   };
- 
 
   const columns: GridColDef[] = [
     {
@@ -168,30 +178,60 @@ export default function DataTable() {
     },
   ];
 
+  // Search Fn
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const filteredRows = rows.filter(
+    (row) =>
+      row.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.shortName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
- 
-  
-    <div>
-      <div style={{ height: 400, width: "100%", alignItems: "center", position: "relative" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
-          getRowId={(row) => row.companyId}
-        />
-      </div>
-      <AnimatePresence>
-        {isEditing && editingRow && (
-          <motion.div>
-            <EditForm
-              editingRow={editingRow}
-              onUpdate={handleUpdate}
-              onCancel={() => setIsEditing(false)}
+    <>
+      {/* Search Bar */}
+      <div className="absolute top-3 right-5">
+        <div className="relative">
+          <div>
+            <Input
+              id="searchBar"
+              placeholder="search..."
+              className="bg-white sm:w-32 md:w-96 p-4 border rounded-xl sm:h-7 md:h-10"
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+
+            <label
+              htmlFor="searchBar"
+              className="absolute top-2.5 sm:top-2.5 md:top-3 right-2 text-xl"
+            >
+              <CiSearch className="sm:text-sm md:text-base" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center items-center relative">
+        <div className="w-full h-96 p-1 mt-5">
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            getRowId={(row) => row.companyId}
+          />
+        </div>
+        <AnimatePresence>
+          {isEditing && editingRow && (
+            <motion.div>
+              <EditForm
+                editingRow={editingRow}
+                onUpdate={handleUpdate}
+                onCancel={() => setIsEditing(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
 
@@ -202,9 +242,12 @@ interface EditFormProps {
 }
 
 function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
-  const [updatedData, setUpdatedData] = useState<Partial<CompanyData>>(editingRow);
+  const [updatedData, setUpdatedData] =
+    useState<Partial<CompanyData>>(editingRow);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setUpdatedData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -234,7 +277,9 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
         <form onSubmit={handleSubmit} className="mt-8">
           {/* Company Name */}
           <div>
-            <label className="font-bold">Company Name <span className="text-main">*</span></label>
+            <label className="font-bold">
+              Company Name <span className="text-main">*</span>
+            </label>
             <input
               type="text"
               name="companyName"
@@ -272,19 +317,25 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
 
           {/* Daily Code */}
           <div className="mt-4">
-            <label className="font-bold">Daily Code&npsb<span className="text-main">*</span></label>
+            <label className="font-bold">
+              Daily Code&npsb<span className="text-main">*</span>
+            </label>
             <p>{updatedData.dailyCode}</p>
           </div>
 
           {/* Customer Count */}
           <div className="mt-4">
-            <label className="font-bold" >Customer Count <span className="text-main">*</span></label>
+            <label className="font-bold">
+              Customer Count <span className="text-main">*</span>
+            </label>
             <p>{updatedData.customerCount}</p>
           </div>
 
           {/* Is Active */}
           <div className="mt-4">
-            <label className="font-bold">Is Active <span className="text-main">*</span></label>
+            <label className="font-bold">
+              Is Active <span className="text-main">*</span>
+            </label>
             <select
               name="isActive"
               value={updatedData.isActive || ""}
@@ -315,6 +366,6 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
           </div>
         </form>
       </motion.div>
-     </div>
+    </div>
   );
 }
