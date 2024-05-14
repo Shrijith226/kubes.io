@@ -239,7 +239,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
   return (
     <div
       onClick={() => setToggleAdd(false)}
-      className="fixed top-0 left-0 h-screen bg-white bg-opacity-5 backdrop-blur w-full flex justify-center items-center"
+      className="fixed top-0 left-0 h-screen bg-transparent w-full flex justify-center items-center"
     >
       <motion.div
         onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
@@ -573,7 +573,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
                               heading="Suggestions"
                               className="h-32 overflow-y-scroll"
                             >
-                              {[...Array(26).keys()].map((value) => (
+                              {Array.from(Array(26).keys()).map((value) => (
                                 <CommandItem
                                   key={value}
                                   value={value.toString()}
@@ -628,7 +628,7 @@ export default function Index({ setToggleAdd }: AddCustomerProps) {
                               heading="Suggestions"
                               className="h-32 overflow-y-scroll"
                             >
-                              {[...Array(26).keys()].map((value) => (
+                              {Array.from(Array(26).keys()).map((value) => (
                                 <CommandItem
                                   key={value}
                                   value={value.toString()}

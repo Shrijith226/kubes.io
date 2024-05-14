@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { FaEdit, FaEye } from "react-icons/fa";
 import { Button } from "../ui/button";
- 
+import isEqual from "lodash/isEqual";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { query, where, collectionGroup } from "firebase/firestore";
- 
+import { Input } from "../ui/input";
+import { CiSearch } from "react-icons/ci";
 
 interface CompanyData {
   companyId: string;
@@ -25,28 +26,34 @@ export default function DataTable() {
   const [editingRow, setEditingRow] = useState<CompanyData | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
- 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Query all companies
-        const companiesQuerySnapshot = await getDocs(collection(db, "companies"));
+        const companiesQuerySnapshot = await getDocs(
+          collection(db, "companies")
+        );
         const companiesData: CompanyData[] = [];
-  
+
         // Loop through each company
         for (const companyDoc of companiesQuerySnapshot.docs) {
           const companyData = companyDoc.data() as CompanyData;
           const companyId = companyDoc.id;
-  
+
           // Query customers for the current company
-          const customersQuerySnapshot = await getDocs(query(collection(db, "customers"), where("companyName", "==", companyData.companyName)));
-  
+          const customersQuerySnapshot = await getDocs(
+            query(
+              collection(db, "customers"),
+              where("companyName", "==", companyData.companyName)
+            )
+          );
+
           // Get customer count
           let customerCount = 0;
-          customersQuerySnapshot.forEach(customerDoc => {
+          customersQuerySnapshot.forEach((customerDoc) => {
             customerCount++;
           });
-  
+
           // Add company data with customer count
           companiesData.push({
             ...companyData,
@@ -54,18 +61,17 @@ export default function DataTable() {
             customerCount,
           });
         }
-  
+
         // Set the state with company data including customer count
         setRows(companiesData);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
-  
+
   const handleEdit = (row: CompanyData) => {
     setEditingRow(row);
     setIsEditing(true);
@@ -73,12 +79,17 @@ export default function DataTable() {
 
   const handleUpdate = async (updatedData: Partial<CompanyData>) => {
     try {
-      await updateDoc(doc(db, "companies", (updatedData as CompanyData).companyId), updatedData);
+      await updateDoc(
+        doc(db, "companies", (updatedData as CompanyData).companyId),
+        updatedData
+      );
       setIsEditing(false);
       setEditingRow(null);
       const updatedRows = await getDocs(collection(db, "companies"));
       setRows(
-        updatedRows.docs.map((doc) => ({ ...doc.data(), companyId: doc.id }) as CompanyData)
+        updatedRows.docs.map(
+          (doc) => ({ ...doc.data(), companyId: doc.id } as CompanyData)
+        )
       );
       setNotification("Company data updated successfully!");
       setTimeout(() => {
@@ -89,7 +100,6 @@ export default function DataTable() {
       setNotification("Error updating company data!");
     }
   };
- 
 
   const columns: GridColDef[] = [
     {
@@ -168,43 +178,81 @@ export default function DataTable() {
     },
   ];
 
+  // Search Fn
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const filteredRows = rows.filter(
+    (row) =>
+      row.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.shortName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
- 
-  
-    <div>
-      <div style={{ height: 400, width: "100%", alignItems: "center", position: "relative" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
-          getRowId={(row) => row.companyId}
-        />
-      </div>
-      <AnimatePresence>
-        {isEditing && editingRow && (
-          <motion.div>
-            <EditForm
-              editingRow={editingRow}
-              onUpdate={handleUpdate}
-              onCancel={() => setIsEditing(false)}
+    <>
+      {/* Search Bar */}
+      <div className="absolute top-3 right-5">
+        <div className="relative">
+          <div>
+            <Input
+              id="searchBar"
+              placeholder="search..."
+              className="bg-white sm:w-32 md:w-96 p-4 border rounded-xl sm:h-7 md:h-10"
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+
+            <label
+              htmlFor="searchBar"
+              className="absolute top-2.5 sm:top-2.5 md:top-3 right-2 text-xl"
+            >
+              <CiSearch className="sm:text-sm md:text-base" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center items-center relative">
+        <div className="w-full h-96 p-1 mt-5">
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            getRowId={(row) => row.companyId}
+          />
+        </div>
+        <AnimatePresence>
+          {isEditing && editingRow && (
+            <motion.div>
+              <EditForm
+                editingRow={editingRow}
+                onUpdate={handleUpdate}
+                onCancel={() => setIsEditing(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
+//Edit Form
 
 interface EditFormProps {
   editingRow: CompanyData;
   onUpdate: (updatedData: Partial<CompanyData>) => void;
   onCancel: () => void;
 }
-
 function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
   const [updatedData, setUpdatedData] = useState<Partial<CompanyData>>(editingRow);
+  const [initialData, setInitialData] = useState<Partial<CompanyData>>(editingRow);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    setInitialData(editingRow);
+    setUpdatedData(editingRow);
+  }, [editingRow]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setUpdatedData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -214,10 +262,13 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
     onUpdate(updatedData);
   };
 
+  // Check if there are any changes
+  const isFormModified = !isEqual(updatedData, initialData);
+
   return (
     <div
       onClick={onCancel} // Close the modal if clicked outside
-      className="bg-white bg-opacity-5 backdrop-blur fixed h-screen  top-0 left-0 flex justify-center items-center"
+      className="bg-white bg-opacity-5  fixed h-screen w-screen top-0 left-0 flex justify-center items-center"
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
@@ -225,7 +276,7 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
         animate={{ scaleY: 1 }}
         exit={{ scaleY: 0 }}
         transition={{ ease: "easeInOut", delay: 0.3 }}
-        className="bg-white border-4 border-main shadow-sm h-fit sm:w-[85vw] md:w-[30vw] px-12 py-8 rounded-xl relative overflow-hidden"
+        className="bg-white border-4 border-main shadow-sm h-fit sm:w-[85vw] md:w-[40vw] px-12 py-8 rounded-xl relative overflow-hidden z-10"
       >
         <h1 className="text-center text-main uppercase text-xl font-bold">
           Edit a Company
@@ -234,65 +285,73 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
         <form onSubmit={handleSubmit} className="mt-8">
           {/* Company Name */}
           <div>
-            <label className="font-bold">Company Name <span className="text-main">*</span></label>
+            <label className="font-bold">
+              Company Name <span className="text-main">*</span>
+            </label>
             <input
               type="text"
               name="companyName"
               value={updatedData.companyName || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Short Name */}
           <div className="mt-4">
-            <label className="font-bold">
-              Short Name <span className="text-main">*</span>
-            </label>
+            <label className="font-bold">Short Name <span className="text-main">*</span></label>
             <input
               type="text"
               name="shortName"
               value={updatedData.shortName || ""}
               onChange={handleChange}
-              className="mt-5" // Add margin-top for spacing
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Discount Percentage */}
           <div className="mt-4">
-            <label className="font-bold">
-              Discount Percentage <span className="text-main">*</span>
-            </label>
+            <label className="font-bold">Discount Percentage <span className="text-main">*</span></label>
             <input
               type="text"
               name="discountPercentage"
               value={updatedData.discountPercentage || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Daily Code */}
           <div className="mt-4">
-            <label className="font-bold">Daily Code&npsb<span className="text-main">*</span></label>
-            <p>{updatedData.dailyCode}</p>
+            <label className="font-bold">Daily Code <span className="text-main">*</span></label>
+            <div className="flex items-center border border-gray-300 rounded-md px-3 py-2">
+              <input type="text" value={updatedData.dailyCode} disabled />
+              <i className="fas fa-ban"></i> {/* This is a disabled icon from Font Awesome */}
+            </div>
           </div>
 
           {/* Customer Count */}
           <div className="mt-4">
-            <label className="font-bold" >Customer Count <span className="text-main">*</span></label>
-            <p>{updatedData.customerCount}</p>
+            <label className="font-bold">Customer Count <span className="text-main">*</span></label>
+            <div className="flex items-center border border-gray-300 rounded-md px-3 py-2">
+              <p>{updatedData.customerCount}</p>
+            </div>
           </div>
 
           {/* Is Active */}
           <div className="mt-4">
-            <label className="font-bold">Is Active <span className="text-main">*</span></label>
+            <label className="font-bold">
+              Is Active <span className="text-main">*</span>
+            </label>
             <select
               name="isActive"
               value={updatedData.isActive || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             >
               <option value="">Select</option>
-              <option value="TRUE">True</option>
-              <option value="FALSE">False</option>
+              <option value="True">True</option>
+              <option value="False">False</option>
             </select>
           </div>
 
@@ -300,7 +359,8 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
           <div className="flex justify-start items-center gap-4">
             <button
               type="submit"
-              className="bg-black text-white border border-black w-fit h-12 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3"
+              disabled={!isFormModified} // Disable button if form is not modified
+              className={`bg-black text-white border border-black w-fit h-12 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3 px-6 py-2 ${!isFormModified && "opacity-50 cursor-not-allowed"}`}
             >
               Save & Update
             </button>
@@ -308,13 +368,15 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="bg-red-600 text-white border border-red-600 w-fit h-12 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3"
+              className="bg-red-600 text-white border border-red-600 w-fit h-12 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3 px-6 py-2"
             >
               Cancel
             </button>
           </div>
         </form>
       </motion.div>
-     </div>
+    </div>
   );
 }
+
+

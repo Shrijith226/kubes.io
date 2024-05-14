@@ -1,5 +1,5 @@
 // Icons
-import { BiSolidOffer } from "react-icons/bi";
+import { HiOutlineSpeakerphone } from "react-icons/hi";
 import { LuLayoutTemplate } from "react-icons/lu";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
@@ -24,13 +24,13 @@ export const menuItems: MenuItem[] = [
     menu: "Customers",
   },
   {
-    href: "/coupons",
-    icon: BiSolidOffer,
-    menu: "Coupons",
-  },
-  {
     href: "/templates",
     icon: LuLayoutTemplate,
     menu: "Templates",
+  },
+  {
+    href: "/broadcast",
+    icon: HiOutlineSpeakerphone,
+    menu: "Broadcast",
   },
 ];

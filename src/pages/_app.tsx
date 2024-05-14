@@ -1,7 +1,6 @@
 "use client";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -11,8 +10,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 
@@ -26,17 +25,15 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
-import Topbar from "@/components/Topbar";
-
-
 
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { AuthProvider } from "@/providers/AuthContextProvider";
 import Sidebar from "@/components/Sidebar";
+import { AuthProvider } from "@/providers/AuthContextProvider";
+import { CustomerProvider } from "@/providers/CountProvider";
+
 const formSchema = z.object({
   email: z.string().email({
     message: "Invalid email address.",
@@ -48,15 +45,11 @@ const formSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
+
 export default function App({ Component, pageProps }: AppProps) {
-
-
-  const router = useRouter();
-
-
   useEffect(() => {
     // Check if user is logged in when component mounts
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     setIsLoggedIn(loggedIn);
   }, []);
 
@@ -119,12 +112,12 @@ export default function App({ Component, pageProps }: AppProps) {
         if (userLogin && userLogin.email && userLogin.uid) {
           setError("");
           setIsLoading(false);
-      
+
           setIsSuccess("Login successfull");
           localStorage.setItem("UID", userLogin.uid);
           localStorage.setItem("Email", userLogin.email);
           setIsLoggedIn(true);
-          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem("isLoggedIn", "true");
         }
       }
     } catch (error: unknown) {
@@ -140,7 +133,7 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         console.log(error.message);
       }
-    }  finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -159,8 +152,6 @@ export default function App({ Component, pageProps }: AppProps) {
       return;
     }
 
-    console.log(recoveryDatas.recoveryEmail);
-
     try {
       await sendPasswordResetEmail(Auth, recoveryDatas.recoveryEmail);
       setIsSuccess(
@@ -173,217 +164,220 @@ export default function App({ Component, pageProps }: AppProps) {
       setIsLoading(false);
     }
   };
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  return(
-  <>
-   
-   {isLoggedIn ? (
-    <main className="">
-      <AuthProvider>
-           <main className="flex ">
-           
-              <Sidebar />
-           
+  return (
+    <>
+      {isLoggedIn ? (
+        <main className="">
+          <AuthProvider>
+            <CustomerProvider>
+              <main className="flex ">
+                <Sidebar />
 
-          
-              
-              <Component {...pageProps} />
-              
-           
-          </main>
-  
-          <Navbar />
-  
-    </AuthProvider>
-  </main>
-    ) : (
-      
-      <main>
-      <section className="h-screen overflow-hidden md:flex md:justify-between items-center">
-        <div className="w-1/2 h-full flex justify-center items-center">
-          <Image
-            src={"/kubes.png"}
-            alt="KUBES"
-            priority
-            height={10000}
-            width={10000}
-            className="w-96 h-96 object-cover"
-          />
-        </div>
+                <Component {...pageProps} />
+              </main>
 
-        <div className="w-1/2 h-full flex justify-center items-center">
-        <div>
-      <h1 className="font-bold text-6xl">
-        {!isForgetPasswordClicked ? "Login" : "ForgetPassword"}
-      </h1>
-      <p className="font-light text-xl py-3">
-        {!isForgetPasswordClicked
-          ? "Please login to continue to your account"
-          : "give your email to change the password"}
-      </p>
+              <Navbar />
+            </CustomerProvider>
+          </AuthProvider>
+        </main>
+      ) : (
+        <main>
+          <section className="h-screen overflow-hidden md:flex md:justify-between items-center">
+            <div className="w-1/2 h-full flex justify-center items-center">
+              <Image
+                src={"/kubes.png"}
+                alt="KUBES"
+                priority
+                height={10000}
+                width={10000}
+                className="w-96 h-96 object-cover"
+              />
+            </div>
 
-      {!isForgetPasswordClicked ? (
-        <Form {...form}>
-          <form className="text-xs relative">
-            {/* Email */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Email"
-                      type="email"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setIsEmail(e.target.value);
-                        field.onChange(e);
-                      }}
-                      className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
-                    />
-                  </FormControl>
+            <div className="w-1/2 h-full flex justify-center items-center">
+              <div>
+                <h1 className="font-bold text-6xl">
+                  {!isForgetPasswordClicked ? "Login" : "ForgetPassword"}
+                </h1>
+                <p className="font-light text-xl py-3">
+                  {!isForgetPasswordClicked
+                    ? "Please login to continue to your account"
+                    : "give your email to change the password"}
+                </p>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {!isForgetPasswordClicked ? (
+                  <Form {...form}>
+                    <form className="text-xs relative">
+                      {/* Email */}
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Email"
+                                type="email"
+                                onChange={(
+                                  e: ChangeEvent<HTMLInputElement>
+                                ) => {
+                                  setIsEmail(e.target.value);
+                                  field.onChange(e);
+                                }}
+                                className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
+                              />
+                            </FormControl>
 
-            {/* Password */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="password"
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          setIsPassword(e.target.value);
-                          field.onChange(e);
-                        }}
-                        className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
 
-                      {showPassword ? (
-                        <div
-                          title="hide passwords"
-                          onClick={() => setShowPassword(false)}
-                          className="text-2xl cursor-pointer absolute top-3.5 right-5"
-                        >
-                          <IoIosEyeOff />
+                      {/* Password */}
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Input
+                                  type={showPassword ? "text" : "password"}
+                                  placeholder="password"
+                                  onChange={(
+                                    e: ChangeEvent<HTMLInputElement>
+                                  ) => {
+                                    setIsPassword(e.target.value);
+                                    field.onChange(e);
+                                  }}
+                                  className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
+                                />
+
+                                {showPassword ? (
+                                  <div
+                                    title="hide passwords"
+                                    onClick={() => setShowPassword(false)}
+                                    className="text-2xl cursor-pointer absolute top-3.5 right-5"
+                                  >
+                                    <IoIosEyeOff />
+                                  </div>
+                                ) : (
+                                  <div
+                                    title="show passwords"
+                                    onClick={() => setShowPassword(true)}
+                                    className="text-2xl cursor-pointer absolute top-3.5 right-5"
+                                  >
+                                    <IoIosEye />
+                                  </div>
+                                )}
+                              </div>
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Remember me */}
+                      <div className="flex justify-between items-center text-xs py-8">
+                        <div className="flex items-center justify-center gap-2">
+                          <Checkbox id="terms" />
+                          <label
+                            htmlFor="terms"
+                            className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            remember me
+                          </label>
                         </div>
-                      ) : (
-                        <div
-                          title="show passwords"
-                          onClick={() => setShowPassword(true)}
-                          className="text-2xl cursor-pointer absolute top-3.5 right-5"
-                        >
-                          <IoIosEye />
+                        <div className="flex justify-center items-center">
+                          Forget Password?
+                          <Button
+                            type="button"
+                            onClick={() => setIsforgetPasswordClicked(true)}
+                            className="text-green underline font-bold p-1"
+                          >
+                            click here
+                          </Button>
                         </div>
+                      </div>
+
+                      <Button
+                        onClick={Login}
+                        disabled={!(isEmail && isPassword)}
+                        className="bg-green text-white border border-green w-full h-10 rounded-xl hover:bg-white hover:text-black transition-all ease-in-out duration-500"
+                      >
+                        {isLoading ? "Loading..." : "Login"}
+                      </Button>
+
+                      {error && (
+                        <div className="text-red-600 mt-4">*{error}</div>
                       )}
-                    </div>
-                  </FormControl>
+                    </form>
+                  </Form>
+                ) : (
+                  <Form {...form}>
+                    <form>
+                      {/* Recovery Email */}
+                      <FormField
+                        control={form.control}
+                        name="recoveryEmail"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Email"
+                                type="email"
+                                onChange={(
+                                  e: ChangeEvent<HTMLInputElement>
+                                ) => {
+                                  setIsRecoveryPassword(e.target.value);
+                                  field.onChange(e);
+                                }}
+                                className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
+                              />
+                            </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            {/* Remember me */}
-            <div className="flex justify-between items-center text-xs py-8">
-              <div className="flex items-center justify-center gap-2">
-                <Checkbox id="terms" />
-                <label
-                  htmlFor="terms"
-                  className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  remember me
-                </label>
-              </div>
-              <div className="flex justify-center items-center">
-                Forget Password?
-                <Button
-                  type="button"
-                  onClick={() => setIsforgetPasswordClicked(true)}
-                  className="text-green underline font-bold p-1"
-                >
-                  click here
-                </Button>
+                      {/* Buttons */}
+                      <div className="flex justify-between items-center gap-4 mt-4">
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setIsforgetPasswordClicked(false);
+                          }}
+                          className="h-10 rounded-xl"
+                        >
+                          <IoIosArrowRoundBack className="text-2xl mr-2" /> Go
+                          back
+                        </Button>
+
+                        <Button
+                          disabled={!isRecoveryPassword}
+                          onClick={passRecovery}
+                          className="bg-green text-white border border-green w-full h-10 rounded-xl hover:bg-white hover:text-black transition-all ease-in-out duration-500"
+                        >
+                          {isLoading ? "Loading..." : "Submit"}
+                        </Button>
+                      </div>
+
+                      {error && (
+                        <div className="mt-4 text-red-600">{error}</div>
+                      )}
+                      {isSuccess && <div className="mt-4">{isSuccess}</div>}
+                    </form>
+                  </Form>
+                )}
               </div>
             </div>
-
-            <Button
-              onClick={Login}
-              disabled={!(isEmail && isPassword)}
-              className="bg-green text-white border border-green w-full h-10 rounded-xl hover:bg-white hover:text-black transition-all ease-in-out duration-500"
-            >
-              {isLoading ? "Loading..." : "Login"}
-            </Button>
-
-            {error && <div className="text-red-600 mt-4">*{error}</div>}
-          </form>
-        </Form>
-      ) : (
-        <Form {...form}>
-          <form>
-            {/* Recovery Email */}
-            <FormField
-              control={form.control}
-              name="recoveryEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Email"
-                      type="email"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setIsRecoveryPassword(e.target.value);
-                        field.onChange(e);
-                      }}
-                      className="border-2 border-black py-6 px-8 rounded-xl focus-visible:border-green placeholder:text-xl placeholder:text-black text-xl font-light"
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Buttons */}
-            <div className="flex justify-between items-center gap-4 mt-4">
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsforgetPasswordClicked(false);
-                }}
-                className="h-10 rounded-xl"
-              >
-                <IoIosArrowRoundBack className="text-2xl mr-2" /> Go back
-              </Button>
-
-              <Button
-                disabled={!isRecoveryPassword}
-                onClick={passRecovery}
-                className="bg-green text-white border border-green w-full h-10 rounded-xl hover:bg-white hover:text-black transition-all ease-in-out duration-500"
-              >
-                {isLoading ? "Loading..." : "Submit"}
-              </Button>
-            </div>
-
-            {error && <div className="mt-4 text-red-600">{error}</div>}
-            {isSuccess && <div className="mt-4">{isSuccess}</div>}
-          </form>
-        </Form>
+          </section>
+        </main>
       )}
-    </div>
-        </div>
-      </section>
-    </main>
-     )}
-     </>
-);
-  
-
+    </>
+  );
 }

@@ -1,21 +1,23 @@
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useTheme } from "@mui/material/styles";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { AnimatePresence, motion } from "framer-motion";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import {
   useState,
   useEffect,
   FC,
   FormEvent,
-  ChangeEvent,
   Dispatch,
   SetStateAction,
   useCallback,
 } from "react";
 
 // Icons
-import { FaEdit } from "react-icons/fa";
+import { CiSearch } from "react-icons/ci";
 import { IoMdDownload } from "react-icons/io";
+import { FaEdit, FaRegEye } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
 // Firebase
@@ -32,7 +34,6 @@ import {
   CommandList,
 } from "../ui/command";
 
-// Schemas
 interface CustomerData {
   id: string;
   uniqueID: string;
@@ -79,112 +80,110 @@ export default function DataTable() {
     fetchData();
   }, []);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const columns: GridColDef[] = [
     {
       field: "uniqueID",
       headerName: "Membership ID",
-      flex: 1,
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       align: "center",
       headerAlign: "center",
-      resizable: false,
       headerClassName: "w-full",
     },
     {
       field: "firstName",
       headerName: "First Name",
-      flex: 1,
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: false,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "lastName",
       headerName: "Last Name",
-      flex: 1,
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "companyName",
       headerName: "Company",
-      flex: 1,
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "emailID",
       headerName: "Email",
-      flex: 1,
       align: "center",
-      width: 180,
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "dob",
       headerName: "DOB(DD/MM)",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "phoneNumber",
       headerName: "Phone Number",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "birthdayDiscount",
       headerName: "Birthday Discount",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "specialDiscount",
       headerName: "Special Discount",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "isActive",
       headerName: "Activity Status",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
     },
     {
       field: "action",
       headerName: "Action",
-      flex: 1,
       align: "center",
+      flex: isMobile ? 0 : 1,
+      width: isMobile ? 130 : undefined,
       headerAlign: "center",
-      resizable: true,
       headerClassName: "sm:text-xs md:text-sm lg:text-base font-bold",
       renderCell: (params) => (
-        <div className="flex items-center justify-center h-12 w-2/4">
+        <div className="flex items-center justify-center h-12">
           <div className="flex justify-center items-center gap-4 text-xl">
             <div
               onClick={() => {
@@ -204,6 +203,14 @@ export default function DataTable() {
             >
               <FaEdit />
             </div>
+
+            <div
+              className="text-main cursor-pointer"
+              title="view"
+              onClick={() => setEditingCustomer(params.row)}
+            >
+              <FaRegEye />
+            </div>
           </div>
         </div>
       ),
@@ -212,7 +219,7 @@ export default function DataTable() {
 
   // Download
   const downloadData = useCallback(() => {
-    const dataStr = JSON.stringify(rows);
+    const dataStr = JSON.stringify(rows, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
@@ -224,45 +231,88 @@ export default function DataTable() {
     linkElement.click();
   }, [rows]);
 
+  // Search Fn
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const filteredRows = rows.filter(
+    (row) =>
+      row.dob.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.emailID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.uniqueID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.isActive.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.specialDiscount.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.birthdayDiscount.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex justify-center items-center relative">
-      <div className="w-full p-1 mt-5 md:w-full">
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-        />
-
-        <Button
-          variant={"outline"}
-          onClick={downloadData}
-          className="rounded-3xl border-main absolute -top-[1.6rem] right-0 text-sm"
-        >
-          <IoMdDownload className="text-main text-xl mr-2" /> Download Audit Log
-        </Button>
-
-        <AnimatePresence>
-          {editingCustomer && (
-            <EditCustomerForm
-              customer={editingCustomer}
-              setEditingCustomer={setEditingCustomer}
+    <>
+      {/* Search Bar */}
+      <div className="absolute top-3 right-5">
+        <div className="relative">
+          <div>
+            <Input
+              id="searchBar"
+              placeholder="search..."
+              className="bg-white sm:w-32 md:w-96 p-4 border rounded-xl sm:h-7 md:h-10"
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             />
-          )}
 
-          {deleteCustomer && (
-            <DeleteCustomer
-              setDeleteCustomer={setDeleteCustomer}
-              deleteCustomerName={deleteCustomerName}
-            />
-          )}
-        </AnimatePresence>
+            <label
+              htmlFor="searchBar"
+              className="absolute top-2.5 sm:top-2.5 md:top-3 right-2 text-xl"
+            >
+              <CiSearch className="sm:text-sm md:text-base" />
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div className="flex justify-center items-center relative">
+        <div className="w-full h-96 p-1 mt-5">
+          <DataGrid
+            key={filteredRows.length}
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 5 },
+              },
+            }}
+          />
+
+          <Button
+            variant={"outline"}
+            onClick={downloadData}
+            className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-[4.4rem] right-0 lg:right-44 text-sm"
+          >
+            <IoMdDownload className="text-main text-xl mr-2" /> Download Audit
+            Log
+          </Button>
+
+          <AnimatePresence>
+            {editingCustomer && (
+              <EditCustomerForm
+                customer={editingCustomer}
+                setEditingCustomer={setEditingCustomer}
+              />
+            )}
+
+            {deleteCustomer && (
+              <DeleteCustomer
+                setDeleteCustomer={setDeleteCustomer}
+                deleteCustomerName={deleteCustomerName}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </>
   );
 }
 
