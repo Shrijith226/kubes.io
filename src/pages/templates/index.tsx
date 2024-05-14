@@ -1,5 +1,4 @@
 "use client";
-import Head from "next/head";
 import { useState } from "react";
 import { renderToString } from "react-dom/server";
 const Templates: React.FC = () => {
@@ -9,6 +8,7 @@ const Templates: React.FC = () => {
   const [birthday, setBirthday] = useState("");
   const [special, setSpecial] = useState("");
   const [offline, setOffline] = useState("");
+  
 
   const details = [
     {
@@ -188,69 +188,69 @@ const Templates: React.FC = () => {
   };
 
   return (
+    <div className="overflow-y-scroll h-screen w-[65rem]">
+      <div className="mt-10 flex flex-col lg:flex-row w-30 mb-32">
+        <div className="w-[90%] lg:w-[65%] xl:w-[55%] mx-4 md:mx-5 bg-white p-3 pt-10 rounded-xl shadow-md">
+          {details.map((msg) => (
+            <div
+              key={msg.id}
+              className="flex flex-col md:flex-row justify-between mb-6"
+            >
+              <h1 className="text-base lg:text-sm xl:text-xl font-bold flex items-center mb-2 md:mb-0">
+                {msg.heading}
+              </h1>
+              <div>
+                <textarea
+                  value={
+                    msg.heading === "Welcome Message:"
+                      ? welcome
+                      : msg.heading === "Unsuccessful Message:"
+                      ? unsuccessful
+                      : msg.heading === "Successful Message:"
+                      ? successful
+                      : msg.heading === "Birthday Message:"
+                      ? birthday
+                      : msg.heading === "Special Message:"
+                      ? special
+                      : msg.heading === "Offline Message:"
+                      ? offline
+                      : ""
+                  }
+                  className="textarea textarea-bordered border w-full md:w-80 lg:w-[20rem] xl:w-[30rem] h-40 text-sm rounded-lg ml-1 md:ml-0 p-2"
+                  onChange={(e) => handleChange(msg.heading, e.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+          <div className="place-content-center flex mt-8 mb-2">
+            <button className="text-white bg-red-100 border-red-100 hover:text-black font-bold p-4 bg-main hover:bg-red-500 rounded-xl">
+              Save Changes
+            </button>
+          </div>
+        </div>
+        <div className="w-[90%] lg:w-[35%] xl:w-[40%] ml-4 lg:ml-0 mr-0 lg:mr-3 xl:mr-0">
+          <div>
             {details.map((msg) => (
               <div
                 key={msg.id}
-                className="flex flex-col md:flex-row justify-between mb-6"
+                className="border border-gray-400 p-3 rounded-xl shadow-md mt-5 lg:mt-0 mb-8"
               >
-                <h1 className="text-base lg:text-sm xl:text-xl font-bold flex items-center mb-2 md:mb-0">
+                <h1 className="font-bold text-sm md:text-base">
                   {msg.heading}
                 </h1>
-                <div>
-                  <textarea
-                    value={
-                      msg.heading === "Welcome Message:"
-                        ? welcome
-                        : msg.heading === "Unsuccessful Message:"
-                        ? unsuccessful
-                        : msg.heading === "Successful Message:"
-                        ? successful
-                        : msg.heading === "Birthday Message:"
-                        ? birthday
-                        : msg.heading === "Special Message:"
-                        ? special
-                        : msg.heading === "Offline Message:"
-                        ? offline
-                        : ""
-                    }
-                    className="textarea textarea-bordered border w-full md:w-80 lg:w-[20rem] xl:w-[30rem] h-40 text-sm rounded-lg ml-1 md:ml-0 p-2"
-                    onChange={(e) => handleChange(msg.heading, e.target.value)}
-                  />
-                </div>
+                <p className="text-xs mt-2">{msg.description}</p>
+                <button
+                  onClick={() => handleUseButtonClick(msg.description, msg.id)}
+                  className="text-white bg-red-100 border-red-100 hover:text-black font-bold px-8 py-2 bg-main hover:bg-red-500 rounded-xl mt-2"
+                >
+                  Use
+                </button>
               </div>
             ))}
-            <div className="place-content-center flex mt-8 mb-2">
-              <button className="text-white bg-red-100 border-red-100 hover:text-black font-bold p-4 bg-main hover:bg-red-500 rounded-xl">
-                Save Changes
-              </button>
-            </div>
-          </div>
-          <div className="w-[90%] lg:w-[35%] xl:w-[40%] ml-4 lg:ml-0 mr-0 lg:mr-3 xl:mr-0">
-            <div>
-              {details.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="border border-gray-400 p-3 rounded-xl shadow-md mt-5 lg:mt-0 mb-8"
-                >
-                  <h1 className="font-bold text-sm md:text-base">
-                    {msg.heading}
-                  </h1>
-                  <p className="text-xs mt-2">{msg.description}</p>
-                  <button
-                    onClick={() =>
-                      handleUseButtonClick(msg.description, msg.id)
-                    }
-                    className="text-white bg-red-100 border-red-100 hover:text-black font-bold px-8 py-2 bg-main hover:bg-red-500 rounded-xl mt-2"
-                  >
-                    Use
-                  </button>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

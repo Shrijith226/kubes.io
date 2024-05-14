@@ -3,7 +3,7 @@ import React from 'react';
 
 const Viewcompany = () => {
     return (
-        <div className='w-full'>
+        <div className='w-full p-6'>
             
             <h1 className='text-black font-bold text-xl ml-3 mt-3'>Form</h1>
             <div className='flex flex-col md:flex-row  md:gap-20 ml-2 mr-2 mt-6'>

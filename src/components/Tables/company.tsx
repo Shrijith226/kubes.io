@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { query, where, collectionGroup } from "firebase/firestore";
 import { Input } from "../ui/input";
 import { CiSearch } from "react-icons/ci";
-
+import { Link } from "lucide-react";
+import { useRouter } from "next/navigation";
 interface CompanyData {
   companyId: string;
   companyName: string;
@@ -21,6 +22,7 @@ interface CompanyData {
 }
 
 export default function DataTable() {
+  const router = useRouter()
   const [rows, setRows] = useState<CompanyData[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingRow, setEditingRow] = useState<CompanyData | null>(null);
@@ -117,13 +119,13 @@ export default function DataTable() {
           >
             <FaEdit />
           </Button>
-
+        
           <Button
-            onClick={() => console.log("View action clicked for", params.row)}
+            onClick={(params)=>void router.push("/viewcompany")}
             className="text-main cursor-pointer bg-red-100"
           >
-            <FaEye />
-          </Button>
+           <FaEye /> 
+         </Button>
         </div>
       ),
     },
