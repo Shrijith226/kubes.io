@@ -32,7 +32,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Sidebar from "@/components/Sidebar";
 import { AuthProvider } from "@/providers/AuthContextProvider";
-import { CustomerProvider } from "@/providers/CustomerCountProvider";
+import { CustomerProvider } from "@/providers/CountProvider";
 
 const formSchema = z.object({
   email: z.string().email({

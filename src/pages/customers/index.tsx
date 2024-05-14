@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import DataTable from "@/components/Tables";
 import { AnimatePresence } from "framer-motion";
 import AddCustomer from "@/components/AddCustomers";
+import { useCustomers } from "@/providers/CountProvider";
 import { useAuth } from "@/providers/AuthContextProvider";
-import { useCustomers } from "@/providers/CustomerCountProvider";
 
 // Icons
 import { CiSearch } from "react-icons/ci";
@@ -12,13 +12,13 @@ import { GoVerified } from "react-icons/go";
 import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { IoIosAddCircle } from "react-icons/io";
+import { PiDesktopLight } from "react-icons/pi";
 import { MdOutlinePeopleAlt } from "react-icons/md";
-import { PiBuildingsThin, PiDesktopLight } from "react-icons/pi";
 
 export default function Customer() {
   const user = useAuth();
   const pathname = usePathname();
-  const { customerCount } = useCustomers();
+  const { customerCount, companyCount } = useCustomers();
   const [isLoading, setIsLoading] = useState(true);
   const [toggleAdd, setToggleAdd] = useState<boolean>(false);
 
@@ -57,6 +57,7 @@ export default function Customer() {
             </div>
           </section>
 
+          {/* Count */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4 ">
             <div className="space-x-2 bg-white rounded-md">
               <div className="flex justify-center p-2">
@@ -85,7 +86,9 @@ export default function Customer() {
               <div>
                 <h1 className="text-center">Active companies</h1>
 
-                <h1>counts</h1>
+                <p className="text-center text-lg font-medium">
+                  {companyCount}
+                </p>
               </div>
             </div>
           </div>
