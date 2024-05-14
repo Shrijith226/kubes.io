@@ -8,6 +8,7 @@ const Templates: React.FC = () => {
   const [birthday, setBirthday] = useState("");
   const [special, setSpecial] = useState("");
   const [offline, setOffline] = useState("");
+  
 
   const details = [
     {
@@ -187,8 +188,8 @@ const Templates: React.FC = () => {
   };
 
   return (
-    <div className="overflow-y-scroll h-screen">
-      <div className="mt-10 flex flex-col lg:flex-row w-full mb-32">
+    <div className="overflow-y-scroll h-screen w-[65rem]">
+      <div className="mt-10 flex flex-col lg:flex-row w-30 mb-32">
         <div className="w-[90%] lg:w-[65%] xl:w-[55%] mx-4 md:mx-5 bg-white p-3 pt-10 rounded-xl shadow-md">
           {details.map((msg) => (
             <div
@@ -215,14 +216,14 @@ const Templates: React.FC = () => {
                       ? offline
                       : ""
                   }
-                  className="textarea textarea-bordered border w-64 md:w-80 lg:w-[20rem] xl:w-[30rem] h-40 text-sm rounded-lg ml-1 md:ml-0 p-2"
+                  className="textarea textarea-bordered border w-full md:w-80 lg:w-[20rem] xl:w-[30rem] h-40 text-sm rounded-lg ml-1 md:ml-0 p-2"
                   onChange={(e) => handleChange(msg.heading, e.target.value)}
                 />
               </div>
             </div>
           ))}
           <div className="place-content-center flex mt-8 mb-2">
-            <button className="text-white hover:text-black font-bold p-4 bg-main hover:bg-red-500 rounded-xl">
+            <button className="text-white bg-red-100 border-red-100 hover:text-black font-bold p-4 bg-main hover:bg-red-500 rounded-xl">
               Save Changes
             </button>
           </div>
@@ -240,7 +241,7 @@ const Templates: React.FC = () => {
                 <p className="text-xs mt-2">{msg.description}</p>
                 <button
                   onClick={() => handleUseButtonClick(msg.description, msg.id)}
-                  className="text-white hover:text-black font-bold px-8 py-2 bg-main hover:bg-red-500 rounded-xl mt-2"
+                  className="text-white bg-red-100 border-red-100 hover:text-black font-bold px-8 py-2 bg-main hover:bg-red-500 rounded-xl mt-2"
                 >
                   Use
                 </button>
