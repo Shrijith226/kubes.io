@@ -188,14 +188,6 @@ const Templates: React.FC = () => {
   };
 
   return (
-    <>
-      <Head>
-        <title>KUBE | Templates</title>
-      </Head>
-      
-      <div className="overflow-y-scroll h-screen w-[65rem]">
-        <div className="mt-10 flex flex-col lg:flex-row w-30 mb-32">
-          <div className="w-[90%] lg:w-[65%] xl:w-[55%] mx-4 md:mx-5 bg-white p-3 pt-10 rounded-xl shadow-md">
             {details.map((msg) => (
               <div
                 key={msg.id}
