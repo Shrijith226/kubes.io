@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { FaEdit, FaEye } from "react-icons/fa";
 import { Button } from "../ui/button";
- 
+import isEqual from "lodash/isEqual";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -194,15 +194,21 @@ export default function DataTable() {
     </div>
   );
 }
+//Edit Form
 
 interface EditFormProps {
   editingRow: CompanyData;
   onUpdate: (updatedData: Partial<CompanyData>) => void;
   onCancel: () => void;
 }
-
 function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
   const [updatedData, setUpdatedData] = useState<Partial<CompanyData>>(editingRow);
+  const [initialData, setInitialData] = useState<Partial<CompanyData>>(editingRow);
+
+  useEffect(() => {
+    setInitialData(editingRow);
+    setUpdatedData(editingRow);
+  }, [editingRow]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -214,10 +220,13 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
     onUpdate(updatedData);
   };
 
+  // Check if there are any changes
+  const isFormModified = !isEqual(updatedData, initialData);
+
   return (
     <div
       onClick={onCancel} // Close the modal if clicked outside
-      className="bg-white bg-opacity-5 backdrop-blur fixed h-screen  top-0 left-0 flex justify-center items-center"
+      className="bg-white bg-opacity-5  fixed h-screen w-screen top-0 left-0 flex justify-center items-center"
     >
       <motion.div
         onClick={(e) => e.stopPropagation()}
@@ -225,7 +234,7 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
         animate={{ scaleY: 1 }}
         exit={{ scaleY: 0 }}
         transition={{ ease: "easeInOut", delay: 0.3 }}
-        className="bg-white border-4 border-main shadow-sm h-fit sm:w-[85vw] md:w-[30vw] px-12 py-8 rounded-xl relative overflow-hidden"
+        className="bg-white border-4 border-main shadow-sm h-fit sm:w-[85vw] md:w-[40vw] px-12 py-8 rounded-xl relative overflow-hidden z-10"
       >
         <h1 className="text-center text-main uppercase text-xl font-bold">
           Edit a Company
@@ -240,46 +249,49 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
               name="companyName"
               value={updatedData.companyName || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Short Name */}
           <div className="mt-4">
-            <label className="font-bold">
-              Short Name <span className="text-main">*</span>
-            </label>
+            <label className="font-bold">Short Name <span className="text-main">*</span></label>
             <input
               type="text"
               name="shortName"
               value={updatedData.shortName || ""}
               onChange={handleChange}
-              className="mt-5" // Add margin-top for spacing
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Discount Percentage */}
           <div className="mt-4">
-            <label className="font-bold">
-              Discount Percentage <span className="text-main">*</span>
-            </label>
+            <label className="font-bold">Discount Percentage <span className="text-main">*</span></label>
             <input
               type="text"
               name="discountPercentage"
               value={updatedData.discountPercentage || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             />
           </div>
 
           {/* Daily Code */}
           <div className="mt-4">
-            <label className="font-bold">Daily Code&npsb<span className="text-main">*</span></label>
-            <p>{updatedData.dailyCode}</p>
+            <label className="font-bold">Daily Code <span className="text-main">*</span></label>
+            <div className="flex items-center border border-gray-300 rounded-md px-3 py-2">
+              <input type="text" value={updatedData.dailyCode} disabled />
+              <i className="fas fa-ban"></i> {/* This is a disabled icon from Font Awesome */}
+            </div>
           </div>
 
           {/* Customer Count */}
           <div className="mt-4">
-            <label className="font-bold" >Customer Count <span className="text-main">*</span></label>
-            <p>{updatedData.customerCount}</p>
+            <label className="font-bold">Customer Count <span className="text-main">*</span></label>
+            <div className="flex items-center border border-gray-300 rounded-md px-3 py-2">
+              <p>{updatedData.customerCount}</p>
+            </div>
           </div>
 
           {/* Is Active */}
@@ -289,10 +301,11 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
               name="isActive"
               value={updatedData.isActive || ""}
               onChange={handleChange}
+              className="block border border-gray-300 rounded-md w-full mt-1 px-3 py-2"
             >
               <option value="">Select</option>
-              <option value="TRUE">True</option>
-              <option value="FALSE">False</option>
+              <option value="True">True</option>
+              <option value="False">False</option>
             </select>
           </div>
 
@@ -300,7 +313,8 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
           <div className="flex justify-start items-center gap-4">
             <button
               type="submit"
-              className="bg-black text-white border border-black w-fit h-12 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3"
+              disabled={!isFormModified} // Disable button if form is not modified
+              className={`bg-black text-white border border-black w-fit h-12 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3 px-6 py-2 ${!isFormModified && "opacity-50 cursor-not-allowed"}`}
             >
               Save & Update
             </button>
@@ -308,13 +322,15 @@ function EditForm({ editingRow, onUpdate, onCancel }: EditFormProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="bg-red-600 text-white border border-red-600 w-fit h-12 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3"
+              className="bg-red-600 text-white border border-red-600 w-fit h-12 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-10 flex justify-center items-center gap-3 px-6 py-2"
             >
               Cancel
             </button>
           </div>
         </form>
       </motion.div>
-     </div>
+    </div>
   );
 }
+
+

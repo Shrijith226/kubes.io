@@ -1,4 +1,3 @@
-// AddCompany component
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { IoAddCircleOutline } from "react-icons/io5";
@@ -32,9 +31,9 @@ import { db } from "@/lib/firebase";
 import { FirebaseError } from "firebase/app";
 
 const formSchema = z.object({
-  companyName: z.string(),
-  shortName: z.string().min(4),
-  discountPercentage: z.string(),
+  companyName: z.string().min(1, "Company name is required"),
+  shortName: z.string().min(4, "Short name must be at least 4 characters long"),
+  discountPercentage: z.string().min(1, "Discount percentage is required"),
 });
 
 interface AddCompanyProps {
@@ -45,33 +44,11 @@ export default function AddCompany({ setToggleAdd }: AddCompanyProps) {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<string>("");
-  const [existingCompanyName, setExistingCompanyName] = useState<boolean>(
-    false
-  );
-  const [companyCounter, setCompanyCounter] = useState<number>(0);
+  const [existingCompanyName, setExistingCompanyName] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-
-  // Inside the useEffect for fetching the company counter
-useEffect(() => {
-  const fetchCompanyCounter = async () => {
-    const counterDoc = doc(db,"counters", "CompanyCounter");
-    const counterSnap = await getDoc(counterDoc);
-    if (counterSnap.exists()) {
-      const counterValue = counterSnap.data()?.value;
-      setCompanyCounter(counterValue);
-    } else {
-      // If the counter document doesn't exist, create it with an initial value of 0
-      await setDoc(counterDoc, { value: 0 });
-      setCompanyCounter(0);
-    }
-  };
-  
-  fetchCompanyCounter();
-}, []);
-
 
   useEffect(() => {
     const checkExistingCompanyName = async () => {
@@ -88,75 +65,74 @@ useEffect(() => {
     };
 
     checkExistingCompanyName();
-  }, [form]);
+  }, [form.getValues("companyName")]);
 
-// Create a company
-const createCompany = async (e: React.FormEvent) => {
-  setIsLoading(true);
-  e.preventDefault();
+  // Disable submit button if any field is empty or if company name already exists
+  const isSubmitDisabled =
+    !form.formState.isValid || existingCompanyName;
 
-  const data = form.getValues();
+  // Create a company
+  const createCompany = async (e: React.FormEvent) => {
+    setIsLoading(true);
+    e.preventDefault();
 
-  // Check if company name already exists
-  if (existingCompanyName) {
-    setError("Company name already exists");
-    setIsLoading(false);
-    return;
-  }
+    const data = form.getValues();
 
-  // Check if short name is at least 4 characters long
-  if (data.shortName.length < 4) {
-    setError("Short name must be at least 4 characters long");
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    // Increment CompanyCounter and use it as companyID
-    const counterRef = doc(db,"counters", "CompanyCounter");
-    const counterDoc = await getDoc(counterRef);
-    const currentCounterValue = counterDoc.exists() ? counterDoc.data()?.value : 0;
-    const updatedCounterValue = currentCounterValue + 1;
-    const updatedCounter = { value: updatedCounterValue };
-    const companyID = `COMPANY${String(updatedCounterValue).padStart(4, "0")}`;
-
-    // Generate dailyCode
-    const randomSixDigitNumber = Math.floor(100000 + Math.random() * 900000);
-    const shortNamePrefix = data.shortName.substring(0, 4);
-    const dailyCode = `${shortNamePrefix}${randomSixDigitNumber}`;
-
-    const companyData = {
-      ...data,
-      companyID,
-      dailyCode,
-      createDate: new Date().toISOString(),
-      isActive: true,
-    };
-
-    await addDoc(collection(db, "companies"), companyData);
-
-    setError("");
-    setIsLoading(false);
-    setIsSuccess("Company added successfully");
-
-    // Update CompanyCounter
-    await setDoc(counterRef, updatedCounter);
-  } catch (error) {
-    if (error instanceof FirebaseError) {
-      const errorCode = error.code;
-      if (errorCode === "permission-denied") {
-        setError("You do not have permission to perform this operation");
-      } else if (errorCode === "unavailable") {
-        setError("The service is currently unavailable, try again later");
-      } else {
-        setError("Something went wrong");
-      }
-      console.error("Error adding document: ", error.message);
+    // Check if company name already exists
+    if (existingCompanyName) {
+      setError("Company name already exists");
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
-  }
-};
 
+    try {
+      // Increment CompanyCounter and use it as companyID
+      const counterRef = doc(db, "counters", "CompanyCounter");
+      const counterDoc = await getDoc(counterRef);
+      const currentCounterValue = counterDoc.exists()
+        ? counterDoc.data()?.value
+        : 0;
+      const updatedCounterValue = currentCounterValue + 1;
+      const updatedCounter = { value: updatedCounterValue };
+      const companyID = `COMPANY${String(updatedCounterValue).padStart(4, "0")}`;
+
+      // Generate dailyCode
+      const randomSixDigitNumber = Math.floor(100000 + Math.random() * 900000);
+      const shortNamePrefix = data.shortName.substring(0, 4);
+      const dailyCode = `${shortNamePrefix}${randomSixDigitNumber}`;
+
+      const companyData = {
+        ...data,
+        companyID,
+        dailyCode,
+        createDate: new Date().toISOString(),
+        isActive: true,
+      };
+
+      await addDoc(collection(db, "companies"), companyData);
+
+      setError("");
+      setIsLoading(false);
+      setIsSuccess("Company added successfully");
+      window.location.reload();
+
+      // Update CompanyCounter
+      await setDoc(counterRef, updatedCounter);
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        const errorCode = error.code;
+        if (errorCode === "permission-denied") {
+          setError("You do not have permission to perform this operation");
+        } else if (errorCode === "unavailable") {
+          setError("The service is currently unavailable, try again later");
+        } else {
+          setError("Something went wrong");
+        }
+        console.error("Error adding document: ", error.message);
+      }
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -196,11 +172,16 @@ const createCompany = async (e: React.FormEvent) => {
                       Company name already exists
                     </FormMessage>
                   )}
+                  {form.formState.errors.companyName && (
+                    <FormMessage className="text-red-600">
+                      {form.formState.errors.companyName.message}
+                    </FormMessage>
+                  )}
                 </FormItem>
               )}
             />
 
-            <FormField
+<FormField
               control={form.control}
               name="shortName"
               render={({ field }) => (
@@ -230,43 +211,50 @@ const createCompany = async (e: React.FormEvent) => {
                   <FormLabel>Discount Percentage</FormLabel>
                   <FormControl>
                     <Select {...field}>
-                      <option value="">
-                        Select Discount Percentage
-                      </option>
+                      <option value="">Select Discount Percentage</option>
                       {Array.from({ length: 41 }, (_, i) => (
-                        <option key={`option-${i}`} value={`${i}%`}>{`${i}%`}</option>
+                        <option key={`option-${i}`} value={`${i}%`}>
+                          {`${i}%`}
+                        </option>
                       ))}
                     </Select>
                   </FormControl>
-                </FormItem>
-              )}
-            />
+                  {form.formState.errors.discountPercentage && (
+<FormMessage className="text-red-600">
+{form.formState.errors.discountPercentage.message}
+</FormMessage>
+)}
+</FormItem>
+)}
+/>
+<div className="flex justify-start items-center gap-4">
+          <Button
+            onClick={createCompany}
+            type="submit"
+            className={`bg-black text-white border border-black w-fit h-10 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-8 flex justify-center items-center gap-2 ${
+              isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isSubmitDisabled}
+          >
+            <IoAddCircleOutline className="text-xl" />
+            {isLoading ? "Loading..." : "Submit"}
+          </Button>
 
-            <div className="flex justify-start items-center gap-4">
-              <Button
-                onClick={createCompany}
-                type="submit"
-                className="bg-black text-white border border-black w-fit h-10 rounded-2xl hover:bg-white hover:text-black transition-all ease-in-out duration-500 mt-8 flex justify-center items-center gap-2"
-              >
-                <IoAddCircleOutline className="text-xl" />
-                {isLoading ? "Loading..." : "Submit"}
-              </Button>
+          <Button
+            type="button"
+            onClick={() => setToggleAdd(false)}
+            className="bg-red-600 text-white border border-red-600 w-fit h-10 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-8 flex justify-center items-center gap-2"
+          >
+            <FaTimes />
+            Cancel
+          </Button>
+        </div>
 
-              <Button
-                type="button"
-                onClick={() => setToggleAdd(false)}
-                className="bg-red-600 text-white border border-red-600 w-fit h-10 rounded-2xl hover:bg-white hover:text-red-600 transition-all ease-in-out duration-500 mt-8 flex justify-center items-center gap-2"
-              >
-                <FaTimes />
-                Cancel
-              </Button>
-            </div>
-
-            {error && <div className="text-red-600 mt-4">*{error}</div>}
-            {isSuccess && <div className="text-main mt-4">{isSuccess}</div>}
-          </form>
-        </Form>
-      </motion.div>
-    </div>
-  );
-}
+        {error && <div className="text-red-600 mt-4">*{error}</div>}
+        {isSuccess && <div className="text-main mt-4">{isSuccess}</div>}
+      </form>
+    </Form>
+  </motion.div>
+</div>
+  )
+};
