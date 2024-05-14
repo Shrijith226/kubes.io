@@ -15,8 +15,9 @@ import {
 } from "react";
 
 // Icons
-import { FaEdit, FaRegEye } from "react-icons/fa";
+import { CiSearch } from "react-icons/ci";
 import { IoMdDownload } from "react-icons/io";
+import { FaEdit, FaRegEye } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
 // Firebase
@@ -33,7 +34,6 @@ import {
   CommandList,
 } from "../ui/command";
 
-// Schemas
 interface CustomerData {
   id: string;
   uniqueID: string;
@@ -219,7 +219,7 @@ export default function DataTable() {
 
   // Download
   const downloadData = useCallback(() => {
-    const dataStr = JSON.stringify(rows);
+    const dataStr = JSON.stringify(rows, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
@@ -231,45 +231,88 @@ export default function DataTable() {
     linkElement.click();
   }, [rows]);
 
+  // Search Fn
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const filteredRows = rows.filter(
+    (row) =>
+      row.dob.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.emailID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.uniqueID.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.isActive.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.specialDiscount.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.birthdayDiscount.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex justify-center items-center relative">
-      <div className="w-full p-1 mt-5 md:w-full">
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-        />
-
-        <Button
-          variant={"outline"}
-          onClick={downloadData}
-          className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-[4.4rem] right-0 lg:right-44 text-sm"
-        >
-          <IoMdDownload className="text-main text-xl mr-2" /> Download Audit Log
-        </Button>
-
-        <AnimatePresence>
-          {editingCustomer && (
-            <EditCustomerForm
-              customer={editingCustomer}
-              setEditingCustomer={setEditingCustomer}
+    <>
+      {/* Search Bar */}
+      <div className="absolute top-3 right-5">
+        <div className="relative">
+          <div>
+            <Input
+              id="searchBar"
+              placeholder="search..."
+              className="bg-white sm:w-32 md:w-96 p-4 border rounded-xl sm:h-7 md:h-10"
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
             />
-          )}
 
-          {deleteCustomer && (
-            <DeleteCustomer
-              setDeleteCustomer={setDeleteCustomer}
-              deleteCustomerName={deleteCustomerName}
-            />
-          )}
-        </AnimatePresence>
+            <label
+              htmlFor="searchBar"
+              className="absolute top-2.5 sm:top-2.5 md:top-3 right-2 text-xl"
+            >
+              <CiSearch className="sm:text-sm md:text-base" />
+            </label>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <div className="flex justify-center items-center relative">
+        <div className="w-full h-96 p-1 mt-5">
+          <DataGrid
+            key={filteredRows.length}
+            rows={filteredRows}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 5 },
+              },
+            }}
+          />
+
+          <Button
+            variant={"outline"}
+            onClick={downloadData}
+            className="rounded-3xl border-main absolute -top-[1.6rem] lg:-top-[4.4rem] right-0 lg:right-44 text-sm"
+          >
+            <IoMdDownload className="text-main text-xl mr-2" /> Download Audit
+            Log
+          </Button>
+
+          <AnimatePresence>
+            {editingCustomer && (
+              <EditCustomerForm
+                customer={editingCustomer}
+                setEditingCustomer={setEditingCustomer}
+              />
+            )}
+
+            {deleteCustomer && (
+              <DeleteCustomer
+                setDeleteCustomer={setDeleteCustomer}
+                deleteCustomerName={deleteCustomerName}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </>
   );
 }
 
