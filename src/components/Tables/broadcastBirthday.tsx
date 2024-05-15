@@ -7,7 +7,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 // Firebase
 import { db } from "@/lib/firebase";
 import { getDocs, collection, query, where } from "firebase/firestore";
-import { format, isWithinInterval, add } from "date-fns";
+import { format, isWithinInterval, add, endOfMonth } from "date-fns";
 
 interface RowData {
   id: string;
@@ -18,10 +18,11 @@ export default function BirthdayBroadcast() {
   const [rows, setRows] = useState<RowData[]>([]);
 
   // Fetching Customers which birthday in next 30 days
-  useEffect(() => {
+   useEffect(() => {
     const fetchData = async () => {
       const today = new Date();
-      const formattedToday = format(today, "d-MMM");
+      //const endOfNext60Days = add(today, { days: 10 });
+      const formattedToday = format(today, "dd/MM");
 
       const q = query(
         collection(db, "customers"),
@@ -36,9 +37,11 @@ export default function BirthdayBroadcast() {
           const customerBirthdayThisYear = new Date(
             `${customer.dob}-${today.getFullYear()}`
           );
+          // Extend the interval by 30 days, considering the next month
+          const endOfNext60Days = add(today, { days: 30 });
           return isWithinInterval(customerBirthdayThisYear, {
             start: today,
-            end: add(today, { days: 30 }),
+            end: endOfNext60Days,
           });
         });
 
@@ -47,6 +50,7 @@ export default function BirthdayBroadcast() {
 
     fetchData();
   }, []);
+
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
